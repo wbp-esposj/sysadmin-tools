@@ -102,8 +102,7 @@ my %opt_fields;
 my $opt_help;
 my $opt_queue_dir = "/var/lib/pagerduty/pagerduty_nagios";
 my $opt_verbose;
-my @skipped_services = qw( APT );
-
+my @skipped_services = qw( APT BACKUP.* );
 
 sub get_queue_from_dir {
 	my $dh;
@@ -149,8 +148,10 @@ sub flush_queue {
 			chomp;
 			my @fields = split("=", $_, 2);
 			if( $fields[0] eq "SERVICEDESC") {
-				if( $fields[1] ~~ @skipped_services ){
-					$skip = 1;
+				foreach my $service ( @skipped_services ) {
+					if( $fields[1] =~ m/^$service$/ ) {
+						$skip = 1;
+					}
 				}
 			}
 			$event{$fields[0]} = $fields[1];
